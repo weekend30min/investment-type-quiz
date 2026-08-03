@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>あなたの投資スタイル診断 ── 週末30分AI投資</title>
+<meta name="description" content="「配当」「優待」「割安」「テーマ」──同じ日本株でも、あなたに続けられるスタイルは人それぞれ。10問で、あなたのタイプと次に読むべき1冊がわかります。">
+<!-- 診断トップのOGP（結果ページのOGPは r/<type>.html 側で個別に出す） -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="あなたに合う投資スタイル診断 ── 週末30分AI投資">
+<meta property="og:description" content="「配当」「優待」「割安」「テーマ」。10問で、あなたのタイプと次に読むべき1冊がわかります。所要30秒・登録不要・無料。">
+<meta property="og:image" content="https://takahamar55.github.io/investment-type-quiz/ogp/cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root {
+    --paper:#F7F6F1; --raised:#FFFFFF; --ink:#1E2623; --soft:#4C554F; --faint:#7C847E;
+    --rule:#E4E0D6; --rule2:#EEEBE3; --shadow:0 1px 2px rgba(30,38,35,.05),0 10px 34px rgba(30,38,35,.08);
+    --brand:#1C6B59; --brand2:#3C8C76;
+    --type:#1C6B59; --type2:#3C8C76; --type-wash:rgba(28,107,89,.10);
+    --gothic:"Hiragino Kaku Gothic ProN","Yu Gothic","YuGothic","Noto Sans JP",system-ui,sans-serif;
+    --serif:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#13181A; --raised:#1A2022; --ink:#E9E7DF; --soft:#AEB4AE; --faint:#7B837D;
+    --rule:#29302F; --rule2:#212827; --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 36px rgba(0,0,0,.4);
+    --brand:#5FBBA2; --brand2:#7ACDB6;
+  }}
+  :root[data-theme="light"]{--paper:#F7F6F1;--raised:#FFFFFF;--ink:#1E2623;--soft:#4C554F;--faint:#7C847E;--rule:#E4E0D6;--rule2:#EEEBE3;--brand:#1C6B59;--brand2:#3C8C76;}
+  :root[data-theme="dark"]{--paper:#13181A;--raised:#1A2022;--ink:#E9E7DF;--soft:#AEB4AE;--faint:#7B837D;--rule:#29302F;--rule2:#212827;--brand:#5FBBA2;--brand2:#7ACDB6;}
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--paper); color:var(--ink); font-family:var(--gothic);
+    -webkit-font-smoothing:antialiased; line-height:1.75;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:0 clamp(1rem,4vw,2rem) 4rem;
+  }
+  .wrap{width:100%; max-width:600px;}
+
+  header.top{
+    width:100%; max-width:600px; display:flex; align-items:center; justify-content:space-between;
+    padding:1.1rem .2rem .4rem; margin-bottom:.4rem;
+  }
+  .logo{font-size:.74rem; letter-spacing:.12em; font-weight:800; color:var(--brand);}
+  .logo small{display:block; font-weight:500; letter-spacing:.04em; color:var(--faint); font-size:.9em; margin-top:.1rem;}
+  .barwrap{height:6px; background:var(--rule); border-radius:99px; overflow:hidden; margin:.2rem 0 1.6rem;}
+  .bar{height:100%; width:0; background:linear-gradient(90deg,var(--type),var(--type2)); border-radius:99px; transition:width .35s cubic-bezier(.4,0,.2,1);}
+
+  .screen{animation:fade .4s ease both;}
+  @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important;}}
+
+  /* intro */
+  .hero{text-align:center; padding:2.4rem 0 1rem;}
+  .hero .eyebrow{font-size:.78rem; letter-spacing:.18em; color:var(--brand); font-weight:800; margin-bottom:1.2rem;}
+  .hero h1{font-family:var(--serif); font-weight:800; font-size:clamp(1.7rem,6.5vw,2.5rem); line-height:1.35; margin:0 0 1rem; text-wrap:balance;}
+  .hero h1 .u{background:linear-gradient(transparent 60%,var(--type-wash) 60%);}
+  .hero p.sub{color:var(--soft); font-size:1rem; line-height:1.85; max-width:30em; margin:0 auto 1.5rem;}
+  .chips{display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; margin:0 auto 2rem; max-width:26em;}
+  .chip{font-size:.8rem; font-weight:700; padding:.4rem .85rem; border-radius:99px; border:1px solid var(--rule); background:var(--raised); color:var(--soft);}
+  .meta{font-size:.8rem; color:var(--faint); margin-top:1.2rem;}
+
+  .btn{
+    font-family:var(--gothic); font-weight:800; font-size:1.02rem; cursor:pointer;
+    border:none; border-radius:14px; padding:1rem 1.6rem; width:100%;
+    color:#fff; background:linear-gradient(135deg,var(--type),var(--type2));
+    box-shadow:var(--shadow); transition:transform .12s, filter .12s; letter-spacing:.02em;
+  }
+  .btn:hover{filter:brightness(1.05);} .btn:active{transform:translateY(1px);}
+  .btn:focus-visible{outline:3px solid var(--type); outline-offset:3px;}
+  .btn.ghost{background:var(--raised); color:var(--ink); border:1px solid var(--rule); box-shadow:none;}
+  .btn.sm{font-size:.9rem; padding:.75rem 1rem;}
+
+  /* question */
+  .qcount{font-size:.82rem; font-weight:700; color:var(--type); letter-spacing:.05em; margin-bottom:.5rem;}
+  .qtext{font-family:var(--serif); font-weight:800; font-size:clamp(1.25rem,4.5vw,1.6rem); line-height:1.5; margin:0 0 1.5rem; text-wrap:balance;}
+  .opts{display:grid; gap:.7rem;}
+  .opt{
+    text-align:left; font-family:var(--gothic); font-size:1rem; line-height:1.6; cursor:pointer;
+    background:var(--raised); border:1.5px solid var(--rule); border-radius:14px; padding:1rem 1.15rem;
+    color:var(--ink); display:flex; align-items:flex-start; gap:.85rem; transition:border-color .15s, background .15s, transform .1s;
+  }
+  .opt:hover{border-color:var(--type); background:var(--type-wash);}
+  .opt:active{transform:scale(.99);}
+  .opt:focus-visible{outline:3px solid var(--type); outline-offset:2px;}
+  .opt .mk{flex:0 0 auto; width:26px; height:26px; border-radius:50%; border:1.5px solid var(--rule); display:grid; place-items:center; font-size:.8rem; font-weight:800; color:var(--faint); margin-top:.1rem;}
+  .backrow{margin-top:1.4rem; display:flex; justify-content:center;}
+  .backrow button{background:none; border:none; color:var(--faint); font-family:var(--gothic); font-size:.85rem; cursor:pointer; padding:.4rem .8rem;}
+  .backrow button:hover{color:var(--ink);}
+
+  /* result */
+  .rcard{background:var(--raised); border:1px solid var(--rule); border-radius:20px; box-shadow:var(--shadow); overflow:hidden;}
+  .rhead{padding:2rem 1.5rem 1.7rem; text-align:center; color:#fff; background:linear-gradient(150deg,var(--type),var(--type2)); position:relative;}
+  .rhead .emoji{font-size:2.6rem; line-height:1; margin-bottom:.6rem; display:block;}
+  .rhead .rlabel{font-size:.8rem; letter-spacing:.16em; font-weight:700; opacity:.9; margin-bottom:.4rem;}
+  .rhead h2{font-family:var(--serif); font-weight:800; font-size:clamp(1.6rem,6vw,2.1rem); margin:0 0 .5rem; line-height:1.3;}
+  .rhead .catch{font-size:.95rem; font-weight:700; opacity:.95;}
+  .rbody{padding:1.5rem 1.35rem 1.8rem;}
+  .sect{margin-bottom:1.5rem;}
+  .sect h3{font-size:.8rem; letter-spacing:.08em; font-weight:800; color:var(--type); margin:0 0 .6rem; display:flex; align-items:center; gap:.45rem;}
+  .sect p{margin:0; font-size:.95rem; line-height:1.85; color:var(--ink);}
+  .sect p.note{color:var(--soft); font-size:.92rem;}
+  ol.routine{margin:.3rem 0 0; padding:0; list-style:none; counter-reset:r; display:grid; gap:.55rem;}
+  ol.routine li{counter-increment:r; position:relative; padding:.7rem .9rem .7rem 2.7rem; background:var(--type-wash); border-radius:12px; font-size:.92rem; line-height:1.6;}
+  ol.routine li::before{content:counter(r); position:absolute; left:.7rem; top:.7rem; width:1.5rem; height:1.5rem; border-radius:50%; background:var(--type); color:#fff; font-weight:800; font-size:.82rem; display:grid; place-items:center;}
+  .books{display:grid; gap:.6rem;}
+  .book{display:flex; gap:.85rem; align-items:center; text-decoration:none; color:var(--ink); border:1px solid var(--rule); border-radius:12px; padding:.75rem .9rem; transition:border-color .15s, background .15s;}
+  .book:hover{border-color:var(--type); background:var(--type-wash);}
+  .book .bt{flex:0 0 auto; width:42px; height:42px; border-radius:9px; background:linear-gradient(150deg,var(--type),var(--type2)); color:#fff; display:grid; place-items:center; font-weight:800; font-size:1.1rem;}
+  .book .bi{min-width:0;}
+  .book .bi .role{font-size:.7rem; font-weight:800; color:var(--type); letter-spacing:.05em;}
+  .book .bi .tt{font-size:.9rem; font-weight:700; line-height:1.4;}
+  .book .bi .tt small{color:var(--faint); font-weight:500;}
+  .gpts{font-size:.85rem; color:var(--soft); margin-top:.55rem; padding-left:.1rem;}
+  .gpts b{color:var(--type);}
+
+  .cta{display:block; text-decoration:none; text-align:center; font-weight:800; border-radius:14px; padding:1rem; margin-top:.7rem; font-size:1rem; letter-spacing:.01em;}
+  .cta.primary{color:#fff; background:linear-gradient(135deg,var(--type),var(--type2)); box-shadow:var(--shadow);}
+  .cta.primary small{display:block; font-weight:600; font-size:.78rem; opacity:.92; margin-top:.15rem;}
+  .cta.alert{color:#fff; background:linear-gradient(135deg,#C0392B,#E8623F); box-shadow:var(--shadow);}
+  .cta.alert small{display:block; font-weight:600; font-size:.78rem; opacity:.95; margin-top:.15rem;}
+
+  .share{margin-top:1.7rem; padding-top:1.4rem; border-top:1px dashed var(--rule);}
+  .share .lbl{text-align:center; font-size:.85rem; font-weight:700; color:var(--soft); margin-bottom:.7rem;}
+  .share .row{display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem;}
+  .share a{text-decoration:none; text-align:center; font-weight:800; font-size:.85rem; padding:.7rem .4rem; border-radius:12px; border:1px solid var(--rule); color:var(--ink); background:var(--raised);}
+  .share a:hover{border-color:var(--type); background:var(--type-wash);}
+  .again{margin-top:1.2rem;}
+  .disclaimer{font-size:.75rem; color:var(--faint); line-height:1.7; margin-top:1.6rem; text-align:center; padding:0 .5rem;}
+
+  .alltypes{margin-top:1.5rem; display:grid; grid-template-columns:repeat(4,1fr); gap:.4rem;}
+  .alltypes .t{font-size:.68rem; font-weight:700; text-align:center; padding:.5rem .2rem; border-radius:10px; border:1px solid var(--rule); color:var(--faint); background:var(--raised);}
+  .alltypes .t.on{color:#fff; border-color:transparent;}
+  .hidden{display:none!important;}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo">週末30分AI投資<small>忙しい人ほど勝てる仕組み</small></div>
+  <button class="btn ghost sm" style="width:auto;" id="theme" aria-label="テーマ切り替え">🌓</button>
+</header>
+
+<div class="wrap">
+  <div class="barwrap"><div class="bar" id="bar"></div></div>
+
+  <!-- INTRO -->
+  <section class="screen" id="intro">
+    <div class="hero">
+      <div class="eyebrow">30秒でわかる・全10問</div>
+      <h1>あなたに合う<br><span class="u">投資スタイル</span>診断</h1>
+      <p class="sub">「配当」「優待」「割安」「テーマ」──。<br>同じ日本株でも、あなたに「続けられる」スタイルは人それぞれ。<br>10個の質問に答えるだけで、あなたのタイプと、次に読むべき1冊がわかります。</p>
+      <div class="chips">
+        <span class="chip">💰 コツコツ配当型</span>
+        <span class="chip">🎁 優待生活型</span>
+        <span class="chip">🔍 割安発掘型</span>
+        <span class="chip">🚀 テーマ攻め型</span>
+      </div>
+      <button class="btn" id="start">診断をはじめる →</button>
+      <p class="meta">所要30秒・登録不要・完全無料</p>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen hidden" id="quiz">
+    <div class="qcount" id="qcount">Q1 / 10</div>
+    <h2 class="qtext" id="qtext"></h2>
+    <div class="opts" id="opts"></div>
+    <div class="backrow"><button id="back">← ひとつ戻る</button></div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen hidden" id="result"></section>
+</div>
+
+<script>
+/* ---------- data ---------- */
+const AUTHOR = "https://www.amazon.co.jp/stores/hammer/author/B0FPG37V9R";
+/* 診断からの登録先は Substack に一本化 */
+const SUBSTACK = "https://growthstockman.substack.com/";
+const WAITLIST = "#"; // TODO: 減配レーダー ウェイトリストURL（8月）
+const SLUG = {A:"haito", B:"yutai", C:"waribito", D:"theme"}; // 結果ページ（OGP）スラッグ
+
+const Q = [
+ {q:"投資でいちばんワクワクするのは？",a:[
+   ["A","毎月チャリンと配当が入る通知"],["B","優待でタダで外食・買い物できた瞬間"],
+   ["C","「これ安すぎる」お宝銘柄を見つけた時"],["D","話題のテーマ株が急騰する波に乗れた時"]]},
+ {q:"株を持つなら理想の期間は？",a:[
+   ["A","一生持って配当をもらい続けたい"],["B","優待が続く限りずっと"],
+   ["C","割安が解消（適正価格）まで"],["D","テーマが旬な数ヶ月〜数年"]]},
+ {q:"週末30分でやりたいのは？",a:[
+   ["A","配当利回りと連続増配をチェック"],["B","優待の権利確定カレンダーを確認"],
+   ["C","PBR/PERで割安銘柄をスクリーニング"],["D","政策ニュース・話題のテーマを追う"]]},
+ {q:"お金の使い道として惹かれるのは？",a:[
+   ["A","配当を再投資して雪だるま式に増やす"],["B","家族で優待レジャー・外食を楽しむ"],
+   ["C","安く買って値上がり益をとる"],["D","大きく増やして資産をジャンプさせる"]]},
+ {q:"相場が急落したら？",a:[
+   ["A","配当が続くなら気にせず買い増し"],["B","優待が変わらないならホールド"],
+   ["C","バーゲン！割安株を仕込むチャンス"],["D","反発しそうなテーマを物色する"]]},
+ {q:"家計・家族の状況に近いのは？",a:[
+   ["A","老後・じぶん年金を意識している"],["B","共働き・子育てで生活費を助けたい"],
+   ["C","少額から効率よく増やしたい"],["D","攻めて資産を大きくしたい"]]},
+ {q:"銘柄選びで頼りにしたいのは？",a:[
+   ["A","配当実績・累進配当の宣言"],["B","優待内容と使いやすさ"],
+   ["C","財務の割安さ（PBR/PER/資産）"],["D","成長ストーリー・国策の追い風"]]},
+ {q:"ニュースで思わず反応するワードは？",a:[
+   ["A","「増配」「累進配当」"],["B","「優待新設」「優待拡充」"],
+   ["C","「PBR1倍割れ」「東証改革」"],["D","「国策」「補正予算」「テーマ株」"]]},
+ {q:"投資の性格に近いのは？",a:[
+   ["A","コツコツ堅実タイプ"],["B","生活で得したい実利派"],
+   ["C","じっくり分析する探偵タイプ"],["D","流れを読む攻めタイプ"]]},
+ {q:"3年後どうなっていたい？",a:[
+   ["A","配当だけで月◯万円の不労所得"],["B","優待で家族の生活が潤っている"],
+   ["C","割安で仕込んだ株が実を結んでいる"],["D","テーマ株で資産を大きく増やしている"]]},
+];
+
+const TYPES = {
+ A:{key:"A", emoji:"💰", name:"コツコツ配当型", catch:"配当じぶん年金派",
+    c:"#1C6B59", c2:"#3C8C76", wash:"rgba(28,107,89,.10)",
+    strong:"あなたは、派手さより「毎月チャリンと入る安心」を選べる人。相場が荒れても配当が続くかぎり動じない、いちばん長く続けられるタイプです。",
+    caution:"ただし高い利回りに飛びつくと、減配で配当も株価も同時に失うことがあります。「利回り」より「減らさない約束（累進配当・DOE）」で選ぶのが、あなたの勝ち筋。",
+    routine:["気になる高配当株の「配当実績」と「累進配当・DOE宣言の有無」をチェック","配当性向が高すぎ（60%超）ないか＝無理して配当を出してないかを確認","もらった配当を再投資に回して、「雪だるま」を少しずつ大きくする"],
+    books:[["主","2冊目『週末AI×新NISA 毎月配当』","毎月配当を設計する"],["サブ","3冊目『高配当×成長ハイブリッド』","配当を育てる次の一歩"]],
+    gpts:"高配当スクリーニングGPT",
+    news:"配当・増配まわりの話も、毎週書いています", waitlist:true},
+ B:{key:"B", emoji:"🎁", name:"優待生活型", catch:"家族で楽しむ優待ハンター",
+    c:"#B4770C", c2:"#DDA231", wash:"rgba(180,119,12,.12)",
+    strong:"あなたは、投資を「生活のトク」に変えられる実利派。数字だけでなく暮らしが潤う実感があるから、家族も巻き込んで楽しく続けられます。",
+    caution:"優待利回りに目が行きがちですが、優待は改悪・廃止のリスクも。優待＋配当の「二刀流」で、優待が消えても配当が残る銘柄を選ぶと堅いです。",
+    routine:["優待の権利確定カレンダーを確認して、狙う月を押さえる","優待内容が「実際に家族で使えるか」で取捨選択する","優待＋配当の合計利回りと、業績の安定をセットで見る"],
+    books:[["主","4冊目『最強優待企業30選』","家族で楽しむ優待の教科書"],["サブ","3冊目『高配当×成長ハイブリッド』","優待に配当の土台を足す"]],
+    gpts:"優待スクリーニングGPT",
+    news:"優待や、家計まわりの話も毎週書いています", waitlist:false},
+ C:{key:"C", emoji:"🔍", name:"割安発掘型", catch:"お宝バリュー探偵",
+    c:"#1F6F9C", c2:"#4FA8D0", wash:"rgba(31,111,156,.12)",
+    strong:"あなたは、「これ安すぎる」を自分の分析で見つけたい探偵タイプ。人気がない時に仕込める逆張りの胆力は、割安投資でいちばん効く才能です。",
+    caution:"ただ安いだけの「万年割安（バリュートラップ）」にはまる罠も。PBR1倍割れ＋東証改革で「還元を強化し始めた会社」に絞ると、割安が是正されやすくなります。",
+    routine:["PBR/PERで割安な銘柄をスクリーニングする","「PBR1倍割れ × 株主還元の強化」の会社を優先（東証改革の追い風）","割安の「理由」を1つ確かめる ── 一時的か、構造的か"],
+    books:[["主","1冊目『月5万円獲得安定投資術』","AI×割安株の入門"],["サブ","7冊目『急落こそチャンス』","安く買う技術を磨く"]],
+    gpts:"割安スクリーニングGPT",
+    news:"割安株の探し方も、毎週書いています", waitlist:false},
+ D:{key:"D", emoji:"🚀", name:"テーマ攻め型", catch:"波に乗るテーマライダー",
+    c:"#7A4FB0", c2:"#A57FD8", wash:"rgba(122,79,176,.13)",
+    strong:"あなたは、成長ストーリーや国策の追い風を嗅ぎ分け、大きく乗れる攻めタイプ。世の中の変化をお金に変える嗅覚は、テーマ株でいちばんの武器になります。",
+    caution:"話題に飛びつくと高値づかみの危険も。「国策・補正予算」で「追い風が続く」テーマに絞り、旬が過ぎる前の入れ替えルールを決めておくのがコツです。",
+    routine:["政策ニュース・補正予算から、次に来るテーマを追う","テーマ本命の銘柄を「ハマースコア」で採点して絞る","旬が過ぎたら、利確・入れ替えのルールを守る"],
+    books:[["主","6冊目『高市政権17国策株』","国策テーマの読み解き方"],["サブ","7冊目『急落こそチャンス』","攻めた後の守り方"]],
+    gpts:"ハマースコアGPT Pro",
+    news:"国策・テーマ株の動きも、毎週書いています", waitlist:false},
+};
+
+/* ---------- state ---------- */
+let idx=0; const answers=new Array(Q.length).fill(null);
+const $=id=>document.getElementById(id);
+
+function setBar(){ $("bar").style.width = (answers.filter(x=>x!==null).length/Q.length*100)+"%"; }
+
+function renderQ(){
+  const item=Q[idx];
+  $("qcount").textContent=`Q${idx+1} / ${Q.length}`;
+  $("qtext").textContent=item.q;
+  const wrap=$("opts"); wrap.innerHTML="";
+  item.a.forEach(([letter,text])=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.type="button";
+    b.innerHTML=`<span class="mk">${letter}</span><span>${text}</span>`;
+    if(answers[idx]===letter){ b.style.borderColor="var(--type)"; b.style.background="var(--type-wash)"; }
+    b.onclick=()=>{ answers[idx]=letter; setBar(); if(idx<Q.length-1){ idx++; renderQ(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"});} else { showResult(); } };
+    wrap.appendChild(b);
+  });
+  $("back").style.visibility = idx===0 ? "hidden":"visible";
+}
+
+$("back").onclick=()=>{ if(idx>0){ idx--; renderQ(); } };
+
+function tally(){
+  const c={A:0,B:0,C:0,D:0};
+  answers.forEach(x=>{ if(x) c[x]++; });
+  let max=Math.max(c.A,c.B,c.C,c.D);
+  let top=Object.keys(c).filter(k=>c[k]===max);
+  if(top.length>1){ // tiebreak: Q9(index8) then Q1(index0)
+    if(answers[8] && top.includes(answers[8])) return answers[8];
+    if(answers[0] && top.includes(answers[0])) return answers[0];
+  }
+  return top[0];
+}
+
+function showResult(){ renderResult(TYPES[tally()]); }
+
+/* renderResult は、診断完了時にも、共有リンク（#haito など）で直接開いたときにも使う */
+function renderResult(t){
+  document.documentElement.style.setProperty("--type",t.c);
+  document.documentElement.style.setProperty("--type2",t.c2);
+  document.documentElement.style.setProperty("--type-wash",t.wash);
+  $("bar").style.width="100%";
+
+  // シェアURLは「タイプ別OGPページ」(r/<slug>.html) を指す＝SNSで正しいカードが出る
+  const shareUrl = new URL("r/"+SLUG[t.key]+".html", location.href).href;
+  const shareText=encodeURIComponent(`私の投資スタイルは【${t.name}】${t.emoji}（${t.catch}）でした！\nあなたのタイプは？ 週末30分AI投資・投資スタイル診断`);
+  const url=encodeURIComponent(shareUrl);
+
+  const booksHtml=t.books.map(([role,tt,sub])=>`
+    <a class="book" href="${AUTHOR}" target="_blank" rel="noopener">
+      <span class="bt">${role==="主"?"★":"＋"}</span>
+      <span class="bi"><span class="role">${role==="主"?"まず読む1冊":"次に読む"}</span>
+      <span class="tt">${tt}<br><small>${sub}</small></span></span>
+    </a>`).join("");
+
+  const waitlistHtml = t.waitlist ? `
+    <a class="cta alert" href="${WAITLIST}" target="_blank" rel="noopener">
+      ⚠️ あなたの一番の敵は「減配」です
+      <small>8月公開「減配レーダー」ウェイトリストに登録する →</small>
+    </a>` : "";
+
+  const dots = ["A","B","C","D"].map(k=>{
+    const on=k===t.key; const tt=TYPES[k];
+    return `<div class="t ${on?'on':''}" ${on?`style="background:linear-gradient(135deg,${tt.c},${tt.c2})"`:''}>${tt.emoji} ${tt.name.replace("型","")}</div>`;
+  }).join("");
+
+  $("result").innerHTML=`
+    <div class="rcard">
+      <div class="rhead">
+        <span class="emoji">${t.emoji}</span>
+        <div class="rlabel">あなたの投資スタイルは</div>
+        <h2>${t.name}</h2>
+        <div class="catch">── ${t.catch}</div>
+      </div>
+      <div class="rbody">
+        <div class="sect"><h3>💪 あなたの強み</h3><p>${t.strong}</p></div>
+        <div class="sect"><h3>⚠️ 気をつけたいこと</h3><p class="note">${t.caution}</p></div>
+        <div class="sect"><h3>🗓 週末30分でやること</h3>
+          <ol class="routine">${t.routine.map(r=>`<li>${r}</li>`).join("")}</ol>
+        </div>
+        <div class="sect"><h3>📚 あなたに合う本</h3>
+          <div class="books">${booksHtml}</div>
+          <div class="gpts">🤖 合うAIツール：<b>${t.gpts}</b> ／ どのタイプにも効く <b>5冊目『AI×note×投資で月3万円』</b></div>
+        </div>
+        <a class="cta primary" href="${SUBSTACK}" target="_blank" rel="noopener">
+          📨 無料ニュースレター「週末30分AI投資ログ」を受け取る
+          <small>${t.news}／週1・メールで届きます。いつでも解除できます</small>
+        </a>
+        ${waitlistHtml}
+        <div class="share">
+          <div class="lbl">結果をシェアして、友だちのタイプも調べてみよう</div>
+          <div class="row">
+            <a href="https://twitter.com/intent/tweet?text=${shareText}&url=${url}" target="_blank" rel="noopener">𝕏 でシェア</a>
+            <a href="https://www.threads.net/intent/post?text=${shareText}%20${url}" target="_blank" rel="noopener">Threads</a>
+            <a href="https://social-plugins.line.me/lineit/share?url=${url}" target="_blank" rel="noopener">LINE</a>
+          </div>
+        </div>
+        <div class="alltypes">${dots}</div>
+        <button class="btn ghost again" id="retry">もう一度診断する</button>
+        <p class="disclaimer">※この診断は投資スタイルの分類であり、特定の銘柄の売買を推奨するものではありません。投資は自己責任で、最終的な判断はご自身で行ってください。</p>
+      </div>
+    </div>`;
+
+  $("intro").classList.add("hidden");
+  $("quiz").classList.add("hidden");
+  $("result").classList.remove("hidden");
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
+  $("retry").onclick=reset;
+}
+
+function reset(){
+  idx=0; answers.fill(null); setBar();
+  if(location.hash){ history.replaceState(null,"",location.pathname+location.search); }
+  document.documentElement.style.setProperty("--type","var(--brand)");
+  $("result").classList.add("hidden"); $("quiz").classList.add("hidden");
+  $("intro").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+$("start").onclick=()=>{ $("intro").classList.add("hidden"); $("quiz").classList.remove("hidden"); renderQ(); setBar(); };
+
+/* theme toggle */
+$("theme").onclick=()=>{
+  const r=document.documentElement;
+  const cur=r.getAttribute("data-theme");
+  const isDark = cur ? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
+  r.setAttribute("data-theme", isDark?"light":"dark");
+};
+
+/* 共有リンク（例: index.html#haito）で開かれたら、その結果を直接表示する */
+(function deepLink(){
+  const h=location.hash.replace("#","");
+  const entry=Object.entries(SLUG).find(([k,s])=>s===h);
+  if(entry){ renderResult(TYPES[entry[0]]); }
+})();
+</script>
+</body>
+</html>
