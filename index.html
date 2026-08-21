@@ -81,9 +81,10 @@
     background:var(--raised); border:1.5px solid var(--rule); border-radius:14px; padding:1rem 1.15rem;
     color:var(--ink); display:flex; align-items:flex-start; gap:.85rem; transition:border-color .15s, background .15s, transform .1s;
   }
-  .opt:hover{border-color:var(--type); background:var(--type-wash);}
+  @media (hover:hover){ .opt:hover{border-color:var(--type); background:var(--type-wash);} }
   .opt:active{transform:scale(.99);}
   .opt:focus-visible{outline:3px solid var(--type); outline-offset:2px;}
+  .opt.selected{border-color:var(--type); background:var(--type-wash);}
   .opt .mk{flex:0 0 auto; width:26px; height:26px; border-radius:50%; border:1.5px solid var(--rule); display:grid; place-items:center; font-size:.8rem; font-weight:800; color:var(--faint); margin-top:.1rem;}
   .backrow{margin-top:1.4rem; display:flex; justify-content:center;}
   .backrow button{background:none; border:none; color:var(--faint); font-family:var(--gothic); font-size:.85rem; cursor:pointer; padding:.4rem .8rem;}
@@ -176,6 +177,13 @@
 <script>
 /* ---------- data ---------- */
 const AUTHOR = "https://www.amazon.co.jp/stores/hammer/author/B0FPG37V9R";
+/* 各冊の販売ページ（素URL・アソシエイトは使わない） */
+const BOOK_URL = {
+  1:"https://www.amazon.co.jp/dp/B0FNRJ7XGQ", 2:"https://www.amazon.co.jp/dp/B0FRN6YMTP",
+  3:"https://www.amazon.co.jp/dp/B0FWX3RG5Y", 4:"https://www.amazon.co.jp/dp/B0G49MWQRM",
+  5:"https://www.amazon.co.jp/dp/B0GJ61B4CD", 6:"https://www.amazon.co.jp/dp/B0GRD8YMWB",
+  7:"https://www.amazon.co.jp/dp/B0GWRCCGN8",
+};
 /* 診断からの登録先は Substack に一本化 */
 const SUBSTACK = "https://growthstockman.substack.com/";
 const WAITLIST = "https://docs.google.com/forms/d/e/1FAIpQLSdZkNoegb1KjIfrIBIGQC0cwzKkmBKit7c0lG8Rk3jRSXpN7A/viewform"; // 減配レーダー ウェイトリスト（Googleフォーム・2026-08-04 配線）
@@ -220,7 +228,7 @@ const TYPES = {
     strong:"あなたは、派手さより「毎月チャリンと入る安心」を選べる人。相場が荒れても配当が続くかぎり動じない、いちばん長く続けられるタイプです。",
     caution:"ただし高い利回りに飛びつくと、減配で配当も株価も同時に失うことがあります。「利回り」より「減らさない約束（累進配当・DOE）」で選ぶのが、あなたの勝ち筋。",
     routine:["気になる高配当株の「配当実績」と「累進配当・DOE宣言の有無」をチェック","配当性向が高すぎ（60%超）ないか＝無理して配当を出してないかを確認","もらった配当を再投資に回して、「雪だるま」を少しずつ大きくする"],
-    books:[["主","2冊目『週末AI×新NISA 毎月配当』","毎月配当を設計する"],["サブ","3冊目『高配当×成長ハイブリッド』","配当を育てる次の一歩"]],
+    books:[["主",2,"2冊目『週末AI×新NISA 毎月配当』","毎月配当を設計する"],["サブ",3,"3冊目『高配当×成長ハイブリッド』","配当を育てる次の一歩"]],
     gpts:"高配当スクリーニングGPT",
     news:"配当・増配まわりの話も、毎週書いています", waitlist:true},
  B:{key:"B", emoji:"🎁", name:"優待生活型", catch:"家族で楽しむ優待ハンター",
@@ -228,7 +236,7 @@ const TYPES = {
     strong:"あなたは、投資を「生活のトク」に変えられる実利派。数字だけでなく暮らしが潤う実感があるから、家族も巻き込んで楽しく続けられます。",
     caution:"優待利回りに目が行きがちですが、優待は改悪・廃止のリスクも。優待＋配当の「二刀流」で、優待が消えても配当が残る銘柄を選ぶと堅いです。",
     routine:["優待の権利確定カレンダーを確認して、狙う月を押さえる","優待内容が「実際に家族で使えるか」で取捨選択する","優待＋配当の合計利回りと、業績の安定をセットで見る"],
-    books:[["主","4冊目『最強優待企業30選』","家族で楽しむ優待の教科書"],["サブ","3冊目『高配当×成長ハイブリッド』","優待に配当の土台を足す"]],
+    books:[["主",4,"4冊目『最強優待企業30選』","家族で楽しむ優待の教科書"],["サブ",3,"3冊目『高配当×成長ハイブリッド』","優待に配当の土台を足す"]],
     gpts:"優待スクリーニングGPT",
     news:"優待や、家計まわりの話も毎週書いています", waitlist:false},
  C:{key:"C", emoji:"🔍", name:"割安発掘型", catch:"お宝バリュー探偵",
@@ -236,7 +244,7 @@ const TYPES = {
     strong:"あなたは、「これ安すぎる」を自分の分析で見つけたい探偵タイプ。人気がない時に仕込める逆張りの胆力は、割安投資でいちばん効く才能です。",
     caution:"ただ安いだけの「万年割安（バリュートラップ）」にはまる罠も。PBR1倍割れ＋東証改革で「還元を強化し始めた会社」に絞ると、割安が是正されやすくなります。",
     routine:["PBR/PERで割安な銘柄をスクリーニングする","「PBR1倍割れ × 株主還元の強化」の会社を優先（東証改革の追い風）","割安の「理由」を1つ確かめる ── 一時的か、構造的か"],
-    books:[["主","1冊目『月5万円獲得安定投資術』","AI×割安株の入門"],["サブ","7冊目『急落こそチャンス』","安く買う技術を磨く"]],
+    books:[["主",1,"1冊目『月5万円獲得安定投資術』","AI×割安株の入門"],["サブ",7,"7冊目『急落こそチャンス』","安く買う技術を磨く"]],
     gpts:"割安スクリーニングGPT",
     news:"割安株の探し方も、毎週書いています", waitlist:false},
  D:{key:"D", emoji:"🚀", name:"テーマ攻め型", catch:"波に乗るテーマライダー",
@@ -244,13 +252,23 @@ const TYPES = {
     strong:"あなたは、成長ストーリーや国策の追い風を嗅ぎ分け、大きく乗れる攻めタイプ。世の中の変化をお金に変える嗅覚は、テーマ株でいちばんの武器になります。",
     caution:"話題に飛びつくと高値づかみの危険も。「国策・補正予算」で「追い風が続く」テーマに絞り、旬が過ぎる前の入れ替えルールを決めておくのがコツです。",
     routine:["政策ニュース・補正予算から、次に来るテーマを追う","テーマ本命の銘柄を「ハマースコア」で採点して絞る","旬が過ぎたら、利確・入れ替えのルールを守る"],
-    books:[["主","6冊目『高市政権17国策株』","国策テーマの読み解き方"],["サブ","7冊目『急落こそチャンス』","攻めた後の守り方"]],
+    books:[["主",6,"6冊目『高市政権17国策株』","国策テーマの読み解き方"],["サブ",7,"7冊目『急落こそチャンス』","攻めた後の守り方"]],
     gpts:"ハマースコアGPT Pro",
     news:"国策・テーマ株の動きも、毎週書いています", waitlist:false},
 };
 
 /* ---------- state ---------- */
 let idx=0; const answers=new Array(Q.length).fill(null);
+/* 設問ごとの選択肢表示順（タイプ→位置の対応を伏せる）。開始時にシャッフルし、
+   「ひとつ戻る」でも同じ並びを再現できるよう1プレイ中は固定する */
+let order=Q.map((_,i)=>[0,1,2,3]);
+function shuffleOrders(){
+  order=Q.map(item=>{
+    const ix=[...item.a.keys()];
+    for(let i=ix.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ix[i],ix[j]]=[ix[j],ix[i]]; }
+    return ix;
+  });
+}
 const $=id=>document.getElementById(id);
 
 function setBar(){ $("bar").style.width = (answers.filter(x=>x!==null).length/Q.length*100)+"%"; }
@@ -260,11 +278,13 @@ function renderQ(){
   $("qcount").textContent=`Q${idx+1} / ${Q.length}`;
   $("qtext").textContent=item.q;
   const wrap=$("opts"); wrap.innerHTML="";
-  item.a.forEach(([letter,text])=>{
+  order[idx].forEach((ai,pos)=>{
+    const [letter,text]=item.a[ai];
     const b=document.createElement("button");
     b.className="opt"; b.type="button";
-    b.innerHTML=`<span class="mk">${letter}</span><span>${text}</span>`;
-    if(answers[idx]===letter){ b.style.borderColor="var(--type)"; b.style.background="var(--type-wash)"; }
+    /* マーカーは表示位置ベース（A/B/C/D）。タイプの記号を出すと並びから対応が割れる */
+    b.innerHTML=`<span class="mk">${"ABCD"[pos]}</span><span>${text}</span>`;
+    if(answers[idx]===letter){ b.classList.add("selected"); }
     b.onclick=()=>{ answers[idx]=letter; setBar(); if(idx<Q.length-1){ idx++; renderQ(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"});} else { showResult(); } };
     wrap.appendChild(b);
   });
@@ -299,8 +319,8 @@ function renderResult(t){
   const shareText=encodeURIComponent(`私の投資スタイルは【${t.name}】${t.emoji}（${t.catch}）でした！\nあなたのタイプは？ 週末30分AI投資・投資スタイル診断`);
   const url=encodeURIComponent(shareUrl);
 
-  const booksHtml=t.books.map(([role,tt,sub])=>`
-    <a class="book" href="${AUTHOR}" target="_blank" rel="noopener">
+  const booksHtml=t.books.map(([role,no,tt,sub])=>`
+    <a class="book" href="${BOOK_URL[no]||AUTHOR}" target="_blank" rel="noopener">
       <span class="bt">${role==="主"?"★":"＋"}</span>
       <span class="bi"><span class="role">${role==="主"?"まず読む1冊":"次に読む"}</span>
       <span class="tt">${tt}<br><small>${sub}</small></span></span>
@@ -370,7 +390,7 @@ function reset(){
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-$("start").onclick=()=>{ $("intro").classList.add("hidden"); $("quiz").classList.remove("hidden"); renderQ(); setBar(); };
+$("start").onclick=()=>{ shuffleOrders(); idx=0; $("intro").classList.add("hidden"); $("quiz").classList.remove("hidden"); renderQ(); setBar(); };
 
 /* theme toggle */
 $("theme").onclick=()=>{
