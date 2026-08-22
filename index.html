@@ -135,6 +135,8 @@
   .alltypes .t.on{color:#fff; border-color:transparent;}
   .hidden{display:none!important;}
 </style>
+<!-- アクセス解析: Umami Cloud（Cookieを使わず個人を識別しない）。送信するのは表示・クリックの回数とタイプ名のみ -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="20f33d70-dcb9-4392-aa14-42eb46bfe4a9"></script>
 </head>
 <body>
 <header class="top">
@@ -188,6 +190,23 @@ const BOOK_URL = {
 const SUBSTACK = "https://growthstockman.substack.com/";
 const WAITLIST = "https://docs.google.com/forms/d/e/1FAIpQLSdZkNoegb1KjIfrIBIGQC0cwzKkmBKit7c0lG8Rk3jRSXpN7A/viewform"; // 減配レーダー ウェイトリスト（Googleフォーム・2026-08-04 配線）
 const SLUG = {A:"haito", B:"yutai", C:"waribito", D:"theme"}; // 結果ページ（OGP）スラッグ
+
+/* ---------- 計測 ----------
+   解析が読み込めない環境でも診断の動作には影響させない。
+   送るのはイベント名とタイプ名のみ。回答内容・個人に紐づく値は送らない。 */
+let curType = null; // いま表示している結果のスラッグ（クリックイベントに添える）
+function track(name, data){
+  try { if (window.umami) window.umami.track(name, data); } catch(e) {}
+}
+/* 結果カード内の外部リンクは動的生成されるのでイベント委譲で拾う */
+document.addEventListener("click", function(e){
+  const a = e.target.closest && e.target.closest("a[data-ev]");
+  if(!a) return;
+  const d = { type: curType || "unknown" };
+  if(a.dataset.book) d.book = a.dataset.book;
+  if(a.dataset.sns)  d.sns  = a.dataset.sns;
+  track("click_" + a.dataset.ev, d);
+});
 
 const Q = [
  {q:"投資でいちばんワクワクするのは？",a:[
@@ -305,10 +324,10 @@ function tally(){
   return top[0];
 }
 
-function showResult(){ renderResult(TYPES[tally()]); }
+function showResult(){ renderResult(TYPES[tally()], "quiz"); }
 
 /* renderResult は、診断完了時にも、共有リンク（#haito など）で直接開いたときにも使う */
-function renderResult(t){
+function renderResult(t, via){
   document.documentElement.style.setProperty("--type",t.c);
   document.documentElement.style.setProperty("--type2",t.c2);
   document.documentElement.style.setProperty("--type-wash",t.wash);
@@ -320,14 +339,14 @@ function renderResult(t){
   const url=encodeURIComponent(shareUrl);
 
   const booksHtml=t.books.map(([role,no,tt,sub])=>`
-    <a class="book" href="${BOOK_URL[no]||AUTHOR}" target="_blank" rel="noopener">
+    <a class="book" href="${BOOK_URL[no]||AUTHOR}" target="_blank" rel="noopener" data-ev="book" data-book="${no}">
       <span class="bt">${role==="主"?"★":"＋"}</span>
       <span class="bi"><span class="role">${role==="主"?"まず読む1冊":"次に読む"}</span>
       <span class="tt">${tt}<br><small>${sub}</small></span></span>
     </a>`).join("");
 
   const waitlistHtml = t.waitlist ? `
-    <a class="cta alert" href="${WAITLIST}" target="_blank" rel="noopener">
+    <a class="cta alert" href="${WAITLIST}" target="_blank" rel="noopener" data-ev="waitlist">
       ⚠️ あなたの一番の敵は「減配」です
       <small>累進配当30社の"方針変更"を見張る無料通知に登録する →</small>
     </a>` : "";
@@ -355,7 +374,7 @@ function renderResult(t){
           <div class="books">${booksHtml}</div>
           <div class="gpts">🤖 合うAIツール：<b>${t.gpts}</b> ／ どのタイプにも効く <b>5冊目『AI×note×投資で月3万円』</b></div>
         </div>
-        <a class="cta primary" href="${SUBSTACK}" target="_blank" rel="noopener">
+        <a class="cta primary" href="${SUBSTACK}" target="_blank" rel="noopener" data-ev="substack">
           📨 無料ニュースレター「週末30分AI投資ログ」を受け取る
           <small>${t.news}／週1・メールで届きます。いつでも解除できます</small>
         </a>
@@ -363,9 +382,9 @@ function renderResult(t){
         <div class="share">
           <div class="lbl">結果をシェアして、友だちのタイプも調べてみよう</div>
           <div class="row">
-            <a href="https://twitter.com/intent/tweet?text=${shareText}&url=${url}" target="_blank" rel="noopener">𝕏 でシェア</a>
-            <a href="https://www.threads.net/intent/post?text=${shareText}%20${url}" target="_blank" rel="noopener">Threads</a>
-            <a href="https://social-plugins.line.me/lineit/share?url=${url}" target="_blank" rel="noopener">LINE</a>
+            <a href="https://twitter.com/intent/tweet?text=${shareText}&url=${url}" target="_blank" rel="noopener" data-ev="share" data-sns="x">𝕏 でシェア</a>
+            <a href="https://www.threads.net/intent/post?text=${shareText}%20${url}" target="_blank" rel="noopener" data-ev="share" data-sns="threads">Threads</a>
+            <a href="https://social-plugins.line.me/lineit/share?url=${url}" target="_blank" rel="noopener" data-ev="share" data-sns="line">LINE</a>
           </div>
         </div>
         <div class="alltypes">${dots}</div>
@@ -379,6 +398,10 @@ function renderResult(t){
   $("result").classList.remove("hidden");
   $("result").scrollIntoView({behavior:"smooth",block:"start"});
   $("retry").onclick=reset;
+
+  /* 結果表示を1件記録（via=quiz は完走／via=shared は共有リンクからの直接表示） */
+  curType = SLUG[t.key];
+  track("result_view", { type: curType, via: via || "unknown" });
 }
 
 function reset(){
@@ -404,7 +427,7 @@ $("theme").onclick=()=>{
 (function deepLink(){
   const h=location.hash.replace("#","");
   const entry=Object.entries(SLUG).find(([k,s])=>s===h);
-  if(entry){ renderResult(TYPES[entry[0]]); }
+  if(entry){ renderResult(TYPES[entry[0]], "shared"); }
 })();
 </script>
 </body>
