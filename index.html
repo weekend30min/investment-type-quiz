@@ -184,11 +184,17 @@ const BOOK_URL = {
   1:"https://www.amazon.co.jp/dp/B0FNRJ7XGQ", 2:"https://www.amazon.co.jp/dp/B0FRN6YMTP",
   3:"https://www.amazon.co.jp/dp/B0FWX3RG5Y", 4:"https://www.amazon.co.jp/dp/B0G49MWQRM",
   5:"https://www.amazon.co.jp/dp/B0GJ61B4CD", 6:"https://www.amazon.co.jp/dp/B0GRD8YMWB",
-  7:"https://www.amazon.co.jp/dp/B0GWRCCGN8",
+  7:"https://www.amazon.co.jp/dp/B0GWRCCGN8", 8:"https://www.amazon.co.jp/dp/B0H2KMT45R",
+  9:"https://www.amazon.co.jp/dp/B0HDTZYGPX", 10:"https://www.amazon.co.jp/dp/B0HKZFKQXD",
 };
-/* 診断からの登録先は Substack に一本化 */
-const SUBSTACK = "https://growthstockman.substack.com/";
-const WAITLIST = "https://docs.google.com/forms/d/e/1FAIpQLSdZkNoegb1KjIfrIBIGQC0cwzKkmBKit7c0lG8Rk3jRSXpN7A/viewform"; // 減配レーダー ウェイトリスト（Googleフォーム・2026-08-04 配線）
+/* 診断からの登録先＝タイプ別の公式LINE（2026-10-22）。友だち追加した時点で、その本の読者特典が届く。
+   割安型だけは note 専用アカ（1冊目の特典①「週末投資パートナー」を配布）＝1冊目アカは配信枠の都合で使わない */
+const LINE = {
+  A:"https://line.me/R/ti/p/@302xbmam", // 2冊目 毎月配当
+  B:"https://line.me/R/ti/p/@546qwbum", // 4冊目 優待30選
+  C:"https://line.me/R/ti/p/@470nnnxa", // note 専用（1冊目 特典①を配布）
+  D:"https://line.me/R/ti/p/@094khgow", // 6冊目 国策17株
+};
 const SLUG = {A:"haito", B:"yutai", C:"waribito", D:"theme"}; // 結果ページ（OGP）スラッグ
 
 /* ---------- 計測 ----------
@@ -247,17 +253,17 @@ const TYPES = {
     strong:"あなたは、派手さより「毎月チャリンと入る安心」を選べる人。相場が荒れても配当が続くかぎり動じない、いちばん長く続けられるタイプです。",
     caution:"ただし高い利回りに飛びつくと、減配で配当も株価も同時に失うことがあります。「利回り」より「減らさない約束（累進配当・DOE）」で選ぶのが、あなたの勝ち筋。",
     routine:["気になる高配当株の「配当実績」と「累進配当・DOE宣言の有無」をチェック","配当性向が高すぎ（60%超）ないか＝無理して配当を出してないかを確認","もらった配当を再投資に回して、「雪だるま」を少しずつ大きくする"],
-    books:[["主",2,"2冊目『週末AI×新NISA 毎月配当』","毎月配当を設計する"],["サブ",3,"3冊目『高配当×成長ハイブリッド』","配当を育てる次の一歩"]],
+    books:[["主",9,"9冊目『生涯配当金が増え続ける株大全』","減らさない配当（累進配当・DOE）の選び方"],["サブ",2,"2冊目『週末AI×新NISA 毎月配当』","毎月配当を設計する"]],
     gpts:"高配当スクリーニングGPT",
-    news:"配当・増配まわりの話も、毎週書いています", waitlist:true},
+    line:"2冊目『毎月配当』の公式LINE", lineNote:"友だち追加で、配当スクリーニングGPTなどの読者特典が届きます"},
  B:{key:"B", emoji:"🎁", name:"優待生活型", catch:"家族で楽しむ優待ハンター",
     c:"#B4770C", c2:"#DDA231", wash:"rgba(180,119,12,.12)",
     strong:"あなたは、投資を「生活のトク」に変えられる実利派。数字だけでなく暮らしが潤う実感があるから、家族も巻き込んで楽しく続けられます。",
     caution:"優待利回りに目が行きがちですが、優待は改悪・廃止のリスクも。優待＋配当の「二刀流」で、優待が消えても配当が残る銘柄を選ぶと堅いです。",
     routine:["優待の権利確定カレンダーを確認して、狙う月を押さえる","優待内容が「実際に家族で使えるか」で取捨選択する","優待＋配当の合計利回りと、業績の安定をセットで見る"],
-    books:[["主",4,"4冊目『最強優待企業30選』","家族で楽しむ優待の教科書"],["サブ",3,"3冊目『高配当×成長ハイブリッド』","優待に配当の土台を足す"]],
+    books:[["主",4,"4冊目『最強優待企業30選』","家族で楽しむ優待の教科書"],["サブ",8,"8冊目『家族が喜ぶ最強グルメ優待30選』","外食の優待で家計を守る"]],
     gpts:"優待スクリーニングGPT",
-    news:"優待や、家計まわりの話も毎週書いています", waitlist:false},
+    line:"4冊目『最強優待企業30選』の公式LINE", lineNote:"友だち追加で、この本の読者特典（AIプロンプトなど）が届きます"},
  C:{key:"C", emoji:"🔍", name:"割安発掘型", catch:"お宝バリュー探偵",
     c:"#1F6F9C", c2:"#4FA8D0", wash:"rgba(31,111,156,.12)",
     strong:"あなたは、「これ安すぎる」を自分の分析で見つけたい探偵タイプ。人気がない時に仕込める逆張りの胆力は、割安投資でいちばん効く才能です。",
@@ -265,15 +271,15 @@ const TYPES = {
     routine:["PBR/PERで割安な銘柄をスクリーニングする","「PBR1倍割れ × 株主還元の強化」の会社を優先（東証改革の追い風）","割安の「理由」を1つ確かめる ── 一時的か、構造的か"],
     books:[["主",1,"1冊目『月5万円獲得安定投資術』","AI×割安株の入門"],["サブ",7,"7冊目『急落こそチャンス』","安く買う技術を磨く"]],
     gpts:"割安スクリーニングGPT",
-    news:"割安株の探し方も、毎週書いています", waitlist:false},
+    line:"週末30分AI投資の公式LINE", lineNote:"友だち追加で、1冊目の特典①「週末投資パートナー」（AIプロンプト）が届きます"},
  D:{key:"D", emoji:"🚀", name:"テーマ攻め型", catch:"波に乗るテーマライダー",
     c:"#7A4FB0", c2:"#A57FD8", wash:"rgba(122,79,176,.13)",
     strong:"あなたは、成長ストーリーや国策の追い風を嗅ぎ分け、大きく乗れる攻めタイプ。世の中の変化をお金に変える嗅覚は、テーマ株でいちばんの武器になります。",
     caution:"話題に飛びつくと高値づかみの危険も。「国策・補正予算」で「追い風が続く」テーマに絞り、旬が過ぎる前の入れ替えルールを決めておくのがコツです。",
     routine:["政策ニュース・補正予算から、次に来るテーマを追う","テーマ本命の銘柄を「ハマースコア」で採点して絞る","旬が過ぎたら、利確・入れ替えのルールを守る"],
-    books:[["主",6,"6冊目『高市政権17国策株』","国策テーマの読み解き方"],["サブ",7,"7冊目『急落こそチャンス』","攻めた後の守り方"]],
+    books:[["主",6,"6冊目『高市政権17国策株』","国策テーマの読み解き方"],["サブ",10,"10冊目『買った日に3行書くだけ』","旬が過ぎる前の利確・入れ替えルール"]],
     gpts:"ハマースコアGPT Pro",
-    news:"国策・テーマ株の動きも、毎週書いています", waitlist:false},
+    line:"6冊目『高市政権17国策株』の公式LINE", lineNote:"友だち追加で、この本の読者特典（AIプロンプトなど）が届きます"},
 };
 
 /* ---------- state ---------- */
@@ -345,12 +351,6 @@ function renderResult(t, via){
       <span class="tt">${tt}<br><small>${sub}</small></span></span>
     </a>`).join("");
 
-  const waitlistHtml = t.waitlist ? `
-    <a class="cta alert" href="${WAITLIST}" target="_blank" rel="noopener" data-ev="waitlist">
-      ⚠️ あなたの一番の敵は「減配」です
-      <small>累進配当30社の"方針変更"を見張る無料通知に登録する →</small>
-    </a>` : "";
-
   const dots = ["A","B","C","D"].map(k=>{
     const on=k===t.key; const tt=TYPES[k];
     return `<div class="t ${on?'on':''}" ${on?`style="background:linear-gradient(135deg,${tt.c},${tt.c2})"`:''}>${tt.emoji} ${tt.name.replace("型","")}</div>`;
@@ -372,13 +372,14 @@ function renderResult(t, via){
         </div>
         <div class="sect"><h3>📚 あなたに合う本</h3>
           <div class="books">${booksHtml}</div>
-          <div class="gpts">🤖 合うAIツール：<b>${t.gpts}</b> ／ どのタイプにも効く <b>5冊目『AI×note×投資で月3万円』</b></div>
+          <div class="gpts">🤖 合うAIツール：<b>${t.gpts}</b></div>
+          <div class="gpts">📝 どのタイプも、買った後の「持ち方・売り時」は <a href="${BOOK_URL[10]}" target="_blank" rel="noopener" data-ev="book" data-book="10"><b>10冊目『買った日に3行書くだけ』</b></a></div>
+          <div class="gpts">📗 どの本も Kindle Unlimited でも読めます</div>
         </div>
-        <a class="cta primary" href="${SUBSTACK}" target="_blank" rel="noopener" data-ev="substack">
-          📨 無料ニュースレター「週末30分AI投資ログ」を受け取る
-          <small>${t.news}／週1・メールで届きます。いつでも解除できます</small>
+        <a class="cta primary" href="${LINE[t.key]}" target="_blank" rel="noopener" data-ev="line">
+          📱 ${t.line} を友だち追加する
+          <small>${t.lineNote}。いつでもブロックできます</small>
         </a>
-        ${waitlistHtml}
         <div class="share">
           <div class="lbl">結果をシェアして、友だちのタイプも調べてみよう</div>
           <div class="row">
